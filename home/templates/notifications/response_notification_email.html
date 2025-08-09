@@ -1,0 +1,21 @@
+<!-- templates/notifications/response_notification_email.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Response Notification</title>
+</head>
+<body>
+    <h2>Notification Response</h2>
+    <p>Dear {{ sender.first_name }} {{ sender.last_name }},</p>
+    <p>You have received a response to your notification (ID: {{ notification.key }}).</p>
+    <p><strong>Original Message:</strong> {{ notification_content }}</p>
+    <p><strong>Response:</strong> {{ reply_content }}</p>
+    <p><strong>Received on:</strong> {{ timestamp }}</p>
+    {% if terminal_info %}
+        <p><strong>Terminal:</strong> {{ terminal_info.terminal_hostname }} - {{ terminal_info.machine }}</p>
+    {% endif %}
+    <p>Kind regards,</p>
+    <p>The LTH Team</p>
+</body>
+</html>

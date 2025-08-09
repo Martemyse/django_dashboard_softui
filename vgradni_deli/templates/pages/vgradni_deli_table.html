@@ -1,0 +1,167 @@
+<!-- Add at the top of your template to load custom filters -->
+{% load custom_filters %}
+
+<div style="overflow-x: auto;"> <!-- Add scrollable container for the table -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Ime Terminala</th>
+                <th>Label ROM</th>
+                <th>IP Naslov</th>
+                <th>Je ROM</th>
+                <th>Zadnji GET</th>
+                <th>Ure od Zadnjega GET</th>
+                <th>Message GET</th>
+                <th>Zadnji PUT</th>
+                <th>Ure od Zadnjega PUT</th>
+                <th>Message PUT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for terminal in terminals %}
+            <tr>
+                <td>{{ terminal.terminal_hostname|default:"N/A" }}</td>
+                <td>{{ terminal.label_rom|default:"N/A" }}</td>
+                <td>{{ terminal.ip_address|default:"N/A" }}</td>
+                <td>
+                    {% if terminal.is_rom %}
+                        <span class="badge bg-success">DA</span>
+                    {% else %}
+                        <span class="badge bg-danger">NE</span>
+                    {% endif %}
+                </td>
+                <td>{{ terminal.last_get_request|date:"d-m-Y H:i:s"|default:"N/A" }}</td>
+                <td>
+                    {% if terminal.hours_since_last_get is not None %}
+                        <span class="badge 
+                            {% if terminal.hours_since_last_get <= 0.5 %}
+                                bg-success
+                            {% elif terminal.hours_since_last_get <= 1 %}
+                                bg-warning
+                            {% else %}
+                                bg-danger
+                            {% endif %}
+                        ">
+                            {{ terminal.hours_since_last_get|floatformat:1 }} h
+                        </span>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <!-- Message GET Column -->
+                <td class="content-cell" 
+                    data-full-message="{{ terminal.last_get_message|default:"N/A" }}" 
+                    onmouseover="showTooltip(this)" 
+                    onmouseout="hideTooltip(this)">
+                    {{ terminal.last_get_message|truncatechars:100|default:"N/A" }}
+                </td>
+                <td>{{ terminal.last_put_request|date:"d-m-Y H:i:s"|default:"N/A" }}</td>
+                <td>
+                    {% if terminal.hours_since_last_put is not None %}
+                        <span class="badge 
+                            {% if terminal.hours_since_last_put <= 0.5 %}
+                                bg-success
+                            {% elif terminal.hours_since_last_put <= 1 %}
+                                bg-warning
+                            {% else %}
+                                bg-danger
+                            {% endif %}
+                        ">
+                            {{ terminal.hours_since_last_put|floatformat:1 }} h
+                        </span>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <!-- Message PUT Column -->
+                <td class="content-cell" 
+                    data-full-message="{{ terminal.last_put_message|default:"N/A" }}" 
+                    onmouseover="showTooltip(this)" 
+                    onmouseout="hideTooltip(this)">
+                    {{ terminal.last_put_message|truncatechars:100|default:"N/A" }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- JavaScript for Tooltip -->
+<script>
+    function showTooltip(element) {
+        const content = element.getAttribute('data-full-message').trim();
+        if (!content || content === "N/A") return;
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'custom-tooltip';
+        tooltip.textContent = content;
+
+        // Apply styles to the tooltip
+        tooltip.style.position = 'absolute';
+        tooltip.style.background = '#fff';
+        tooltip.style.border = '1px solid #ddd';
+        tooltip.style.padding = '5px';
+        tooltip.style.maxWidth = '600px';  // Adjust as needed
+        tooltip.style.maxHeight = '400px'; // Limit the height
+        tooltip.style.whiteSpace = 'pre-wrap';  // Allow line breaks and wrapping
+        tooltip.style.overflowX = 'auto';  // Allow horizontal scrolling
+        tooltip.style.overflowY = 'auto';  // Allow vertical scrolling
+        tooltip.style.zIndex = '1000';
+        tooltip.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        tooltip.style.borderRadius = '4px';
+
+        // Position the tooltip
+        const rect = element.getBoundingClientRect();
+        const tooltipWidth = 600; // Should match the maxWidth of the tooltip
+        let left = rect.left + window.scrollX;
+        const top = rect.bottom + window.scrollY;
+
+        // Adjust left if tooltip would go off-screen
+        if (left + tooltipWidth > window.innerWidth + window.scrollX) {
+            left = window.innerWidth + window.scrollX - tooltipWidth - 10; // 10px margin
+            if (left < 0) left = 0; // Ensure left is not negative
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+
+        document.body.appendChild(tooltip);
+        element.tooltip = tooltip;
+    }
+
+    function hideTooltip(element) {
+        if (element.tooltip) {
+            document.body.removeChild(element.tooltip);
+            element.tooltip = null;
+        }
+    }
+</script>
+
+<!-- Apply CSS to Limit Column Width -->
+<style>
+    .content-cell {
+        max-width: 500px; /* Limit column width */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer; /* Indicate hoverable content */
+    }
+
+    .custom-tooltip {
+        background: #f9f9f9;
+        border: 1px solid #ccc;
+        padding: 10px;
+        font-size: 14px;
+        max-width: 600px;
+        max-height: 400px;  /* Adjust as needed */
+        overflow-x: auto;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;  /* Break long words */
+    }
+
+    /* Scrollable table container */
+    div[style*="overflow-x: auto"] {
+        width: 100%; /* Ensure it spans the container */
+    }
+</style>

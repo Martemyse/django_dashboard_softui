@@ -1,0 +1,168 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+{% include 'includes/aktivnosti-navigation-fullscreen.html' %}
+
+<script src="{% static 'js/common_nova_akcija.js' %}" defer></script>
+
+<main class="main-content mt-0">
+    <section>
+      <div class="page-header min-vh-75">
+        <div class="container">
+          <div class="row">
+
+            <!-- Make sure the form action uses the correct dynamic values -->
+            <form id="action-form" role="form" method="post" 
+            action="{% url 'nova_akcija_post_form' safe_obrat=safe_obrat safe_oddelek=safe_oddelek %}" 
+            enctype="multipart/form-data">
+
+              {% csrf_token %}
+
+            <!-- Column 1: Fields related to Prejemnik -->
+            <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+              <div class="card card-plain mt-8">
+                <div class="card-header pb-0 text-left bg-transparent">
+                  <h3 class="font-weight-bolder text-info text-gradient">Prejemnik</h3>
+                  <p class="mb-0">Prejemnik vaše akcije</p>
+                </div>
+                <div class="card-body">
+                    <!-- User Selection -->
+                    <div class="form-group mb-3">
+                      <label for="id_username_nova_akcija">Uporabniško ime</label>
+                      <select 
+                        id="id_username_nova_akcija" 
+                        class="form-select js-example-basic-single" 
+                        name="username" 
+                        required
+                        hx-get="{% url 'fetch_steppers' %}" 
+                        hx-trigger="change" 
+                        hx-target="#stepper-list-container" 
+                        hx-include="[name='username']"
+                      >
+                        <option value="">Izberite uporabnika</option>
+                        {% for user in available_users %}
+                          <option value="{{ user.username }}">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</option>
+                        {% endfor %}
+                      </select>
+
+                      <span class="text-danger">{{ form.username.errors }}</span>
+                    </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Column 2: Fields related to Action -->
+            <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+              <div class="card card-plain mt-8">
+                <div class="card-header pb-0 text-left bg-transparent">
+                  <h4 class="font-weight-bolder text-info text-gradient">Nova akcija</h4>
+                  <p class="mb-0">Podrobnosti dodeljene akcije</p>
+                </div>
+                <div class="card-body">
+                  <!-- Add Projekt Field -->
+                  <div class="form-group mb-3" id="stepper-list-container">
+                  <label for="stepper-list">Izberite obstoječi projekt</label>
+                    <!-- The content here will be replaced by HTMX -->
+                    <!-- Initially empty or with a placeholder -->
+                  </div>
+                  
+                  
+                    <!-- Checkbox to Create New Stepper -->
+                    <div class="form-check">
+                      <input type="checkbox" id="createNewStepper" x-model="createNewStepper" class="form-check-input">
+                      <label for="createNewStepper" class="form-check-label">Ustvari nov projekt (nov stepper)</label>
+                    </div>
+
+                    <!-- Project Field for New Stepper -->
+                    <div class="form-group mb-3" x-show="createNewStepper">
+                      <label for="project">Nov projekt</label>
+                      <input type="text" id="project" name="project" class="form-control" placeholder="Ime novega projekta">
+                    </div>
+                  <div class="form-group mb-3">
+                    <label for="machine">Stroj</label>
+                    <input type="text" id="machine" name="machine" class="form-control">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="product">Artikel</label>
+                    <input type="text" id="product" name="product" class="form-control">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="priority">Prioriteta</label>
+                    <select id="priority" name="priority" class="form-control">
+                      <option value="1">Nizka - 1</option>
+                      <option value="2">Srednja - 2</option>
+                      <option value="3">Visoka - 3</option>
+                    </select>
+                  </div>
+                  <!-- Description Field (Opis naloge) -->
+                  <div class="form-group mb-3">
+                    <label for="task_step">Opis naloge</label>
+                    <textarea id="task_step" name="description" class="form-control"></textarea> <!-- 'name' should be 'description' -->
+                  </div>
+
+                  <!-- Expiration Time Field (Datum izteka) -->
+                  <div class="form-group mb-3">
+                    <label for="exp_time">Datum izteka</label>
+                    <input type="date" id="exp_time" name="exp_time" class="form-control" value="{{ exp_time }}">
+                  </div>
+
+                  <!-- File upload for attachments -->
+                  <div class="form-group mb-3">
+                    <label for="files">Priponke (slike/PDF dokumenti)</label>
+                    <input type="file" id="files" name="files" class="form-control" multiple>
+                  </div>
+
+                  <!-- Checkbox for email notification -->
+                  <div class="form-group mb-3">
+                    <input type="checkbox" id="notify-email" name="notify_email" value="true" checked style="accent-color: #17a2b8;">
+                    <label for="notify-email" class="form-label" style="font-size: 0.86rem;">Obvesti preko e-malia</label>
+                  </div>
+
+                  <!-- <div class="form-group mb-3">
+                    <input type="checkbox" id="notify-terminal" name="notify_terminal" value="true" checked style="accent-color: #ffc107;">
+                    <label for="notify-terminal" class="form-label" style="font-size: 0.86rem;">Obvesti preko Windows opozorila (TERMINALI)</label>
+                  </div> -->
+
+                  <!-- Submit Button -->
+                  <div class="text-center">
+                    <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Pošlji akcijo</button>
+                  </div>
+                
+                </div>
+              </div>
+            </div>
+            
+            </form> <!-- Close the form here -->
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+<script>
+  $(document).ready(function() {
+    $('#stepper-list').select2({
+      placeholder: "Izberite projekt",
+      width: '100%'
+    });
+  });
+</script>
+  
+<script>
+  // Toggle the new project field visibility
+  document.getElementById('createNewStepper').addEventListener('change', function() {
+    const newProjectField = document.getElementById('new-project-field');
+    if (this.checked) {
+      newProjectField.style.display = 'block';
+    } else {
+      newProjectField.style.display = 'none';
+    }
+  });
+</script>
+
+{% include 'includes/footer-fullscreen.html' %}
+{% endblock content %}

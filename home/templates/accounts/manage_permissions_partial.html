@@ -1,0 +1,39 @@
+{% load static %}
+{% load custom_filters %} {# Load custom_filters to use get_item filter #}
+{% if grouped_apps %}
+    {% for app_name, apps_list in grouped_apps.items %}
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ app_name }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for app in apps_list %}
+                        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-3">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">{{ app.obrat_oddelek.obrat }} - {{ app.obrat_oddelek.oddelek }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <input type="hidden" name="app_id[]" value="{{ app.aplikacije_obrati_oddelki_id }}">
+                                    <div class="mb-3">
+                                        <label for="role_{{ app.aplikacije_obrati_oddelki_id }}" class="form-label">
+                                            Assigned Role:
+                                        </label>
+                                        <select class="form-select" id="role_{{ app.aplikacije_obrati_oddelki_id }}" name="role_{{ app.aplikacije_obrati_oddelki_id }}">
+                                            {% for role in roles_by_app|get_item:app.aplikacije_obrati_oddelki_id %}
+                                                <option value="{{ role }}" {% if role == app.current_role %}selected{% endif %}>{{ role|capfirst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No applications found for this user.</p>
+{% endif %}

@@ -1,0 +1,185 @@
+{% extends "layouts/aktivnosti_base.html" %}
+
+{% block content %}
+<div class="container" x-data>
+    <h1>{{ safe_obrat }} - {{ safe_oddelek }} Pregled mojih aktivnosti</h1>
+
+    <!-- Filter Section -->
+    <div class="filter-section" style="display: flex; gap: 20px; align-items: center;">
+        <!-- Assignee Dropdown -->
+        <div>
+            <label for="assignee-filter">Assignee:</label>
+            <select id="assignee-filter" name="assignee" 
+                    hx-get="{% url 'pregled' safe_obrat safe_oddelek %}" 
+                    hx-target="#stepper-container" 
+                    hx-trigger="change" 
+                    hx-include="[name='assignee'], [name='obrat_oddelek'], [name='status'], [name='hours_filter'], [name='hide_buttons'], [name='my_issued_tasks']">
+                <option value="">All</option>
+                {% for assignee in unique_assignees %}
+                <option value="{{ assignee }}">{{ assignee }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Obrat Oddelek Dropdown -->
+        <div>
+            <label for="obrat_oddelek-filter">Obrat Oddelek:</label>
+            <select id="obrat_oddelek-filter" name="obrat_oddelek" 
+                    hx-get="{% url 'pregled' safe_obrat safe_oddelek %}" 
+                    hx-target="#stepper-container" 
+                    hx-trigger="change" 
+                    hx-include="[name='assignee'], [name='obrat_oddelek'], [name='status'], [name='hours_filter'], [name='hide_buttons'], [name='my_issued_tasks']">
+                <option value="">All</option>
+                {% for obrat in unique_obrati %}
+                <option value="{{ obrat }}">{{ obrat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Status Dropdown -->
+        <div>
+            <label for="status-filter">Status:</label>
+            <select id="status-filter" name="status" 
+                    hx-get="{% url 'pregled' safe_obrat safe_oddelek %}" 
+                    hx-target="#stepper-container" 
+                    hx-trigger="change" 
+                    hx-include="[name='assignee'], [name='obrat_oddelek'], [name='status'], [name='hours_filter'], [name='hide_buttons'], [name='my_issued_tasks']">
+                <option value="">All</option>
+                <option value="Complete">Complete</option>
+                <option value="Active">Active</option>
+                <option value="Queued">Queued</option>
+                <option value="Expired">Expired</option>
+                <option value="ExpiredComplete">ExpiredComplete</option>
+            </select>
+        </div>
+
+        <!-- Hours Filter Input -->
+        <div>
+            <label for="hours-filter">Modified in Last (Hours):</label>
+            <input type="number" id="hours-filter" name="hours_filter" min="1" value="{{ request.GET.hours_filter|default:24 }}" 
+                hx-get="{% url 'pregled' safe_obrat safe_oddelek %}" 
+                hx-target="#stepper-container" 
+                hx-trigger="change" 
+                hx-include="[name='assignee'], [name='obrat_oddelek'], [name='status'], [name='hours_filter'], [name='hide_buttons'], [name='my_issued_tasks']">
+        </div>
+
+        <!-- Strnjen prikaz (Condensed view) Checkbox -->
+        <div>
+            <label for="hide-buttons-checkbox">Strnjen prikaz:</label>
+            <input type="checkbox" id="hide-buttons-checkbox" name="hide_buttons"
+                   checked
+                   value="true"
+                   hx-get="{% url 'pregled' safe_obrat safe_oddelek %}"
+                   hx-target="#steppers-wrapper"
+                   hx-trigger="change"
+                   hx-include="[name='assignee'], [name='obrat_oddelek'], [name='status'], [name='hours_filter'], [name='hide_buttons'], [name='my_issued_tasks']">
+        </div>
+        
+
+        <!-- Meni izdane naloge (My Issued Tasks) Checkbox -->
+        <div>
+            <label for="my-issued-tasks-checkbox">Meni izdane naloge:</label>
+            <input type="checkbox" id="my-issued-tasks-checkbox" name="my_issued_tasks" 
+                   {% if my_issued_tasks %}checked{% endif %} 
+                   hx-get="{% url 'pregled' safe_obrat safe_oddelek %}" 
+                   hx-target="#stepper-container" 
+                   hx-trigger="change" 
+                   hx-include="[name='assignee'], [name='obrat_oddelek'], [name='status'], [name='hours_filter'], [name='hide_buttons'], [name='my_issued_tasks']">
+        </div>
+    </div>
+
+    <!-- Render the Stepper components -->
+    <div id="steppers-wrapper">
+        <div id="stepper-container" class="stepper-container-flex">
+            {% if steppers_data %}
+                {% for stepper in steppers_data %}
+                <div id="stepper-container-{{ forloop.counter }}" class="stepper-item"></div>
+                {% endfor %}
+            {% else %}
+                <p>No steppers found</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrascript %}
+<!-- Use json_script to safely pass JSON data to the JavaScript -->
+{{ steppers_data|json_script:"steppers-data" }}
+{{ hide_buttons|json_script:"hide-buttons-data" }}
+
+<script>
+    // Declare 'steppersData' globally only if it doesn't exist yet
+    if (typeof window.steppersData === 'undefined') {
+        window.steppersData = JSON.parse(document.getElementById('steppers-data').textContent);
+    } else {
+        // Update the steppersData with the new content
+        window.steppersData = JSON.parse(document.getElementById('steppers-data').textContent);
+    }
+
+    // Declare 'hideButtons' globally only if it doesn't exist yet
+    if (typeof window.hideButtons === 'undefined') {
+        window.hideButtons = JSON.parse(document.getElementById('hide-buttons-data').textContent);
+    } else {
+        // Update the hideButtons with the new content
+        window.hideButtons = JSON.parse(document.getElementById('hide-buttons-data').textContent);
+    }
+
+    // Log the hideButtons value in the browser console
+    console.log("hideButtons:", window.hideButtons);
+
+    // Loop through the steppersData to render StepperClick components
+    steppersData.forEach((stepper, index) => {
+            // Ensure StepperClick is available
+            if (window.StepperClick && window.ReactDOM) {
+                window.ReactDOM.render(
+                    window.React.createElement(window.StepperClick, {
+                        id: stepper.id,
+                        project: stepper.project,
+                        orientation: stepper.orientation || "vertical",
+                        steps: stepper.steps,
+                        initialCompletedSteps: stepper.initialCompletedSteps || [],
+                        activeStep: stepper.activeStep || -1,
+                        assignee: stepper.assignee,
+                        assigner: stepper.assigner,
+                        assignee_username: stepper.assignee_username,
+                        loggedusername: "{{ request.user.username }}",
+                        hideButtons: hideButtons || true,
+                        stepperWidth: stepper.stepperWidth || "400px",
+                        obrat_oddelek: stepper.obrat_oddelek
+                    }),
+                    document.getElementById(`stepper-container-${index + 1}`)
+                );
+            } else {
+                console.error("StepperClick or ReactDOM is not defined.");
+            }
+        });
+</script>
+
+<style>
+    .stepper-container-flex {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px; /* Adjust spacing between steppers */
+    }
+    .stepper-item {
+        flex: 1 1 300px; /* Adjust the width of each stepper */
+        max-width: 400px; /* Set a max width for steppers */
+    }
+    .filter-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .filter-section label {
+        margin-right: 5px;
+    }
+
+    .filter-section select, .filter-section input {
+        margin-right: 15px;
+    }
+</style>
+{% endblock %}

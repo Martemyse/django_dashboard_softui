@@ -1,0 +1,37 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+
+  {% include 'includes/navigation-fullscreen.html' %}
+
+  <main class="main-content mt-0">
+    <section>
+      <div class="page-header min-vh-75">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+              <div class="card card-plain mt-8">
+                <div class="card-header pb-0 text-left bg-transparent">
+                  <h3 class="font-weight-bolder text-info text-gradient">
+                    Uspešno
+                  </h3>
+                </div>
+                <div class="card-body">    
+                  Dovoljenja uspešno posodobljena.
+                </div>
+                <div class="card-footer text-center">
+                  <a href="{% url 'manage_permissions' %}" class="btn btn-info mt-4">Nadaljuj z nastavljanjem dovoljenj.</a>
+                  <a href="{% url 'index' %}" class="btn btn-secondary mt-4">Nazaj na pregledno ploščo.</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {% include 'includes/footer-fullscreen.html' %}
+
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% extends "layouts/statusi_strojev_base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ tim_config.team_name }}</h1>
+    <p><strong>Vodja:</strong> {{ tim_config.vodja }}</p>
+    <div id="tim-detail-page-root" style="height: 600px; width: 100%;"></div>
+</div>
+
+<script>
+    ReactDOM.render(
+        React.createElement(TimDetailPage, {
+            teamNameSlug: "{{ tim_config.team_name_slug }}",
+            csrfToken: "{{ csrf_token }}",
+        }),
+        document.getElementById("tim-detail-page-root")
+    );
+</script>
+{% endblock %}

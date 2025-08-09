@@ -1,0 +1,186 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+{% include 'includes/navigation-fullscreen.html' %}
+
+<script src="{% static 'js/common_add_user.js' %}" defer></script>
+
+
+<!-- Inject the JSON data safely into JavaScript -->
+<script>
+    const addUserAjaxUrl = "{% url 'add_user_ajax' %}";
+    const manageGroupsUrl = "{% url 'manage_groups' %}";
+    const updateGroupMembersUrl = "{% url 'update_group_members' %}"; 
+    const updateUserGroupsUrl = "{% url 'update_user_groups' %}"; 
+    const groups = JSON.parse('{{ groups_json|escapejs }}');
+    const addGroupUrl = "{% url 'add_group' %}";
+    const availableOddelki = JSON.parse('{{ available_oddelki|escapejs }}');
+    const addObratOddelekGroupUrl = "{% url 'add_obrat_oddelek_group' %}";
+</script>
+
+<main class="main-content mt-0">
+    <!-- Header Card for Username Field -->
+    <div style="margin-top: 65px;"> </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+                <div class="card card-plain mt-4" style="border: 2px solid #007bff; background-color: #e9f5ff;">
+                    <div class="card-header pb-0 text-left bg-transparent">
+                        <h4 class="font-weight-bolder text-primary">
+                            Uporabniško ime
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Username Field -->
+                        <div class="mb-3">
+                            <label for="id_username_add_user">Uporabniško ime</label>
+                            {{ form.username }}
+                            <span class="text-danger">{{ form.username.errors }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <div class="page-header min-vh-75">
+            <div class="container">
+                <div class="row d-flex justify-content-around">
+                    <!-- Left Column for User Details -->
+                    <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column">
+                        <div class="card card-plain mt-3">
+                            <div class="card-header pb-0 text-left bg-transparent">
+                                <h3 class="font-weight-bolder text-info text-gradient">
+                                    Podrobnosti uporabnika
+                                </h3>
+                                <p class="mb-0">
+                                    Dodaj uporabnika ali spremeni
+                                </p>
+                            </div>
+                            <div class="card-body">
+                                <form id="user-form" role="form" method="post" action="{% url 'add_user' %}">
+                                    {% csrf_token %}
+                                    <!-- Other Form Fields -->
+
+                                    <!-- First Name Field -->
+                                    <div class="mb-3">
+                                        <label for="id_first_name_add_user">Ime</label>
+                                        {{ form.first_name }}
+                                        <span class="text-danger">{{ form.first_name.errors }}</span>
+                                    </div>
+
+                                    <!-- Last Name Field -->
+                                    <div class="mb-3">
+                                        <label for="id_last_name_add_user">Priimek</label>
+                                        {{ form.last_name }}
+                                        <span class="text-danger">{{ form.last_name.errors }}</span>
+                                    </div>
+
+                                    <!-- Email Field -->
+                                    <div class="mb-3">
+                                        <label for="id_email_add_user">LTH E-poštni naslov</label>
+                                        {{ form.email }}
+                                        <span class="text-danger">{{ form.email.errors }}</span>
+                                    </div>
+
+                                    <!-- User Role Field -->
+                                    <div class="mb-3">
+                                        <label for="id_user_role_add_user">Tip računa</label>
+                                        {{ form.user_role }}
+                                        <span class="text-danger">{{ form.user_role.errors }}</span>
+                                    </div>
+
+                                    <!-- Obrat and Oddelek Selection -->
+                                    <div class="mb-3">
+                                        <label for="id_obrat_oddelek_add_user">Obrat in Oddelek</label>
+                                        {{ form.obrat_oddelek }}
+                                        <span class="text-danger">{{ form.obrat_oddelek.errors }}</span>
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="text-center">
+                                        <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Dodaj Uporabnika</button>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <button type="button" id="update-user-btn" class="btn bg-gradient-success w-100 mt-2 mb-0" onclick="updateUser()">Shrani spremembe</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column for User and Obrat Oddelek Groups -->
+                    <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column">
+                        <!-- User Groups Card -->
+                        <div class="card card-plain mt-3">
+                            <div class="card-header pb-0 text-left bg-transparent">
+                                <h4 class="font-weight-bolder text-info text-gradient">
+                                    Moje skupine
+                                </h4>
+                                <p class="mb-0">
+                                    Uporabnik je član:
+                                </p>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <label for="id_groups_add_user">Skupine uporabnikov</label>
+                                    <select id="id_groups_add_user" class="form-select js-example-basic-multiple select2-hidden-accessible" 
+                                            name="groups[]" multiple="multiple" style="width: 100%;">
+                                        {% for group in available_groups %}
+                                            <option value="{{ group.id }}">{{ group.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" onclick="window.location.href=addGroupUrl" class="btn bg-gradient-info w-100 mt-4 mb-0">Uredi</button>
+                                    <button type="button" id="save-groups-btn" class="btn bg-gradient-success w-100 mt-2 mb-0" onclick="saveUserGroups()">Shrani skupine</button>
+                                </div>
+                                <span class="text-danger">{{ form.groups.errors }}</span>
+                            </div>
+                        </div>
+
+                        <!-- New Card for Obrat Oddelek Groups -->
+                        <div class="card card-plain mt-4" style="border: 1px solid #ffa500; background-color: #fff7e6;" x-data="{ selectedGroups: [] }">
+                            <div class="card-header pb-0 text-left bg-transparent">
+                                <h4 class="font-weight-bolder text-warning">
+                                    Skupine oddelka
+                                </h4>
+                                <p class="mb-0">
+                                    Uporabnik je član:
+                                </p>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <label for="id_obrat_oddelek_groups_add_user">Skupine uporabnikov oddelka</label>
+                                    <!-- Use HTMX to load group options dynamically -->
+                                    <select 
+                                        id="id_obrat_oddelek_groups_add_user" 
+                                        class="form-select js-example-basic-multiple select2-hidden-accessible" 
+                                        name="obrat_oddelek_groups[]" 
+                                        multiple="multiple" 
+                                        style="width: 100%;"
+                                        hx-get="{% url 'get_obrat_oddelek_groups' %}?obrat_oddelek_id={{ selected_obrat_id }}" 
+                                        hx-target="#id_obrat_oddelek_groups_add_user"
+                                        x-model="selectedGroups"
+                                        x-effect="$dispatch('change', { value: selectedGroups })"
+                                    >
+                                        {% for group in available_obrat_oddelek_groups %}
+                                            <option value="{{ group.id }}">{{ group.name }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <button type="button" class="btn bg-gradient-info w-100 mt-4 mb-0" onclick="window.location.href=addObratOddelekGroupUrl">Uredi</button>
+                                    <button type="button" id="save-obrat-oddelek-groups-btn" class="btn bg-gradient-success w-100 mt-2 mb-0" @click="saveObratOddelekGroups">Shrani skupine</button>
+                                </div>
+                                <span class="text-danger">{{ form.obrat_oddelek_groups.errors }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% include 'includes/footer-fullscreen.html' %}
+{% endblock content %}

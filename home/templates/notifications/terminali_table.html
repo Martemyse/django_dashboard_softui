@@ -1,0 +1,65 @@
+<!-- terminali_table.html -->
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Uporabnik</th>
+            <th>Ime Terminala</th>
+            <th>Stroj</th>
+            <th>Label ROM</th>
+            <th>IP Naslov</th>
+            <th>Prijavljen Ob</th>
+            <th>Zadnji utrip</th>
+            <th>Je Terminal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for online_user in online_users %}
+        <tr>
+            <td>{{ online_user.user.username }}</td>
+            <td>{{ online_user.terminal.terminal_hostname|default:"N/A" }}</td>
+            <td>{{ online_user.terminal.machine|default:"N/A" }}</td>
+            <td>{{ online_user.terminal.label_rom|default:"N/A" }}</td>
+            <td>{{ online_user.ip_address }}</td>
+            <td>{{ online_user.sign_in_time }}</td>
+            <td>{{ online_user.last_seen }}</td>
+            <td>
+                {% if online_user.is_terminal %}
+                    <span class="badge bg-success">DA</span>
+                {% else %}
+                    <span class="badge bg-danger">NE</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination Controls -->
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        {% if online_users.has_previous %}
+        <li class="page-item">
+            <a class="page-link" hx-get="{% url 'terminali_overview' %}?page={{ online_users.previous_page_number }}" hx-target="#terminali-table">Previous</a>
+        </li>
+        {% endif %}
+
+        {% for num in online_users.paginator.page_range %}
+        {% if online_users.number == num %}
+        <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" hx-get="{% url 'terminali_overview' %}?page={{ num }}" hx-target="#terminali-table">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        {% if online_users.has_next %}
+        <li class="page-item">
+            <a class="page-link" hx-get="{% url 'terminali_overview' %}?page={{ online_users.next_page_number }}" hx-target="#terminali-table">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>

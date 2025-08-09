@@ -1,0 +1,25 @@
+{% extends "layouts/statusi_strojev_base.html" %}
+
+{% block content %}
+<div>
+    <h1>{{ safe_obrat }} - {{ safe_oddelek }} Lean Team Konfiguracija</h1>
+    <div id="lean-teami-proizvodnja-root"></div>
+</div>
+
+<script>
+    // Render the LeanTeamiConfig component with all permissions to edit and add entries
+    ReactDOM.render(
+      React.createElement(LeanTeamiConfig, {
+          canEditConfig: true,
+          canAddToConfig: true,
+          canEditLeanTeamDefinitions: true,
+          canAddStrojEntry: true,
+          canEditStrojEntry: true,
+          canEditPostaja: true,
+          readOnly: false // Allows full editing
+      }),
+      document.getElementById('lean-teami-proizvodnja-root')
+    );
+</script>
+
+{% endblock %}

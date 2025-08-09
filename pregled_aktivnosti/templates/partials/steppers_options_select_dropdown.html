@@ -1,0 +1,10 @@
+<!-- templates/partials/stepper_options_select_dropdown.html -->
+<select id="stepper-list" class="form-select js-stepper-select" name="stepper">
+    {% if steppers %}
+      {% for stepper in steppers %}
+        <option value="{{ stepper.id }}">{{ stepper.project }}</option>
+      {% endfor %}
+    {% else %}
+      <option value="">No steppers available</option>
+    {% endif %}
+</select>

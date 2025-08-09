@@ -1,0 +1,131 @@
+{% load static %}
+{% load static custom_filters %}
+
+<script>
+  const navigationDynamicObratiAjaxUrl = "{% url 'navigation_dynamic_obrati_ajax' %}";
+  const csrfToken = "{{ csrf_token }}";
+</script>
+
+<nav class="navbar navbar-main navbar-expand-lg shadow-sm border-radius-xl px-4" id="navbarBlur" navbar-scroll="true">
+  <div class="container-fluid py-2">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-5 text-body">
+        <li class="breadcrumb-item text-md">
+          <a class="opacity-7 text-dark dark-page-text" href="{% url 'profile' %}">{{ user.username }}</a>
+        </li>
+        <li class="breadcrumb-item text-md text-dark dark-page-text active ms-2" aria-current="page">{{ obrat_long_name }}</li>
+      </ol>
+    </nav>
+    <!-- End Breadcrumb -->
+
+    <div class="collapse navbar-collapse mt-2 me-md-0 me-sm-4" id="navbar">
+
+      <!-- Left Navigation Links -->
+      <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+        <!-- {% if request.user.is_rezija %}
+        <li class="nav-item d-flex align-items-center">
+          <a href="{% url 'obvestila' %}" class="nav-link font-weight-bold px-0 text-dark dark-page-text">
+            <i class="fas fa-bell me-1"></i> Obvestila
+          </a>
+        </li>
+        {% endif %} -->
+      </div>
+      <!-- Right Navigation Links -->
+      <ul class="navbar-nav justify-content-end align-items-center">
+        <li class="nav-item">
+          <a class="nav-link text-dark font-weight-bold dark-page-text" aria-current="page" href="/">
+            <i class="fa fa-chart-pie me-1"></i>
+            Pregledna plošča
+          </a>
+        </li>
+        {% if request.user.is_rezija %}
+        <li class="nav-item">
+          <a href="{% url 'obvestila' %}" class="nav-link text-dark font-weight-bold dark-page-text">
+            <i class="fas fa-bell me-1"></i> Obvestila
+          </a>
+        </li>
+        {% endif %}
+        {% if request.user.is_authenticated %}
+          {% if request.user|in_group:"vodja,admin,osnovni" %}
+          <li class="nav-item">
+            <a href="{% url 'add_user' %}" class="nav-link text-dark font-weight-bold dark-page-text">
+              <i class="fas fa-user-plus me-1"></i> Dodaj uporabnika
+            </a>
+          </li>
+          {% if request.user.is_rezija %}
+          <li class="nav-item">
+            <a href="{% url 'manage_permissions' %}" class="nav-link text-dark font-weight-bold dark-page-text">
+              <i class="fas fa-key me-1"></i> Dovoljenja
+            </a>
+          </li>
+          {% endif %}
+          {% endif %}
+          <li class="nav-item">
+            <a href="/logout/" class="nav-link text-dark font-weight-bold dark-page-text">
+              <i class="fa fa-user me-1"></i> Odjava
+            </a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a href="{% url 'login' %}" class="nav-link text-dark font-weight-bold dark-page-text">
+              <i class="fa fa-user me-1"></i> Prijava
+            </a>
+          </li>
+        {% endif %}
+        <!-- Dropdown for "Obrat" -->
+        {% if request.user.is_rezija %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-dark font-weight-bold dark-page-text" href="#" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-industry"></i> Obrat
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end dark-page-dropdown" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item dark-page-text">Loading...</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        
+        <li class="nav-item px-3 d-flex align-items-center">
+          <a href="javascript:;" class="nav-link text-body p-0 dark-page-text">
+            <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+          </a>
+        </li>
+
+        <!-- Theme Toggle -->
+        <li class="nav-item d-flex align-items-center">
+          <label for="theme-switch" class="nav-link text-dark dark-page-text m-0">
+            <i class="fa fa-sun cursor-pointer" id="theme-indicator"></i>
+          </label>
+          <input type="checkbox" class="d-none" id="theme-switch"/>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- AJAX Script to Populate Dropdown -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      const dropdownMenu = $('#navbarDropdown').next('.dropdown-menu');
+      dropdownMenu.html('<li><a class="dropdown-item dark-page-text">Loading...</a></li>');
+
+      $.ajax({
+          type: 'GET',
+          url: navigationDynamicObratiAjaxUrl,
+          headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          success: function (response) {
+              dropdownMenu.empty();  // Clear any loading state
+              
+              const customSortOrder = ['Ljubljana', 'Škofja Loka', 'Trata', 'Benkovac', 'Ohrid', 'Čakovec', 'LTH'];
+              response.options.sort((a, b) => customSortOrder.indexOf(a.text) - customSortOrder.indexOf(b.text));
+              
+              response.options.forEach(option => {
+                  dropdownMenu.append('<li><a class="dropdown-item dark-page-text" data-obrat="' + option.value + '">' + option.text + '</a></li>');
+              });
+          },
+          error: function () {
+              dropdownMenu.html('<li><a class="dropdown-item dark-page-text text-danger">Failed to load options</a></li>');
+          }
+      });
+  });
+</script>

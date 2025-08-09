@@ -1,0 +1,48 @@
+{% extends "layouts/vgradni_deli_base.html" %}
+{% block content %}
+<h1>Manage Limits for {{ terminal.label_rom }}</h1>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="signal_key">Signal Key:</label>
+    <input type="text" name="signal_key" class="form-control" required>
+  </div>
+  <div class="form-group">
+    <label for="limit_value">Limit Value:</label>
+    <input type="number" name="limit_value" step="0.01" class="form-control" required>
+  </div>
+  <div class="form-group">
+    <label for="email">Notification Email:</label>
+    <input type="email" name="email" class="form-control" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Add/Update Limit</button>
+</form>
+
+<h2>Your Limits for {{ terminal.label_rom }}</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Signal Key</th>
+      <th>Limit Value</th>
+      <th>Notification Email</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for limit in limits %}
+    <tr>
+      <td>{{ limit.signal_key }}</td>
+      <td>{{ limit.limit_value }}</td>
+      <td>{{ limit.notification_email }}</td>
+      <td>
+        <form method="post" action="{% url 'delete_limit' limit.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% block content %}

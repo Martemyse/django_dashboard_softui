@@ -1,0 +1,42 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+  {% include 'includes/navigation-fullscreen.html' %}
+
+  <main class="main-content mt-0">
+    <section>
+      <div class="page-header min-vh-75">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+              <div class="card card-plain mt-8">
+                <div class="card-header pb-0 text-left bg-transparent">
+                  <h3 class="font-weight-bolder text-info text-gradient">
+                    Neuspešna prijava!
+                  </h3>
+                </div>
+                <div class="card-body">    
+                  {% if error_messages %}
+                    <ul class="list-group">
+                      {% for message in error_messages %}
+                        <li class="list-group-item text-danger">{{ message }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p>No error messages provided.</p>
+                  {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                  <a href="{% url 'login' %}" class="btn btn-info mt-4">Nazaj na stran za prijavo.</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {% include 'includes/footer-fullscreen.html' %}
+{% endblock content %}

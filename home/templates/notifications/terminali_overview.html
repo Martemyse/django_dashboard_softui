@@ -1,0 +1,85 @@
+<!-- terminali_overview.html -->
+
+{% extends "layouts/obvestila_base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Pregled Terminalov</h1>
+
+    <!-- Filter Section -->
+    <div class="filter-section" style="display: flex; gap: 20px; align-items: center;">
+        <!-- Terminal Filter -->
+        <div>
+            <label for="is-terminal-filter">Terminal:</label>
+            <input type="checkbox" id="is-terminal-filter" name="is_terminal" 
+                checked
+                hx-get="{% url 'terminali_overview' %}" 
+                hx-target="#terminali-table"
+                hx-trigger="change"
+                hx-include="[name='is_terminal'], [name='hours_filter'], [name='user'], [name='terminal_hostname'], [name='machine'], [name='label_rom']">
+        </div>
+
+        <!-- Hours Filter -->
+        <div>
+            <label for="hours-filter">V zadnjih (ur):</label>
+            <input type="number" id="hours-filter" name="hours_filter" min="1" 
+                   hx-get="{% url 'terminali_overview' %}" 
+                   hx-target="#terminali-table"
+                   hx-trigger="change"
+                   hx-include="[name='is_terminal'], [name='hours_filter'], [name='user'], [name='terminal_hostname'], [name='machine'], [name='label_rom']">
+        </div>
+
+        <!-- User Filter -->
+        <div>
+            <label for="user-filter">Uporabnik:</label>
+            <select id="user-filter" name="user" 
+                    hx-get="{% url 'terminali_overview' %}" 
+                    hx-target="#terminali-table"
+                    hx-trigger="change"
+                    hx-include="[name='is_terminal'], [name='hours_filter'], [name='user'], [name='terminal_hostname'], [name='machine'], [name='label_rom']">
+                <option value="">Vsi</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Terminal Hostname Filter -->
+        <div>
+            <label for="terminal-hostname-filter">Ime Terminala:</label>
+            <input type="text" id="terminal-hostname-filter" name="terminal_hostname" 
+                   hx-get="{% url 'terminali_overview' %}" 
+                   hx-target="#terminali-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-include="[name='is_terminal'], [name='hours_filter'], [name='user'], [name='terminal_hostname'], [name='machine'], [name='label_rom']">
+        </div>
+
+        <!-- Machine Filter -->
+        <div>
+            <label for="machine-filter">Stroj:</label>
+            <input type="text" id="machine-filter" name="machine" 
+                   hx-get="{% url 'terminali_overview' %}" 
+                   hx-target="#terminali-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-include="[name='is_terminal'], [name='hours_filter'], [name='user'], [name='terminal_hostname'], [name='machine'], [name='label_rom']">
+        </div>
+
+        <!-- Label ROM Filter -->
+        <div>
+            <label for="label-rom-filter">Label ROM:</label>
+            <input type="text" id="label-rom-filter" name="label_rom" 
+                   hx-get="{% url 'terminali_overview' %}" 
+                   hx-target="#terminali-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-include="[name='is_terminal'], [name='hours_filter'], [name='user'], [name='terminal_hostname'], [name='machine'], [name='label_rom']">
+        </div>
+    </div>
+
+    <div class="container-terminali-table" x-data>
+        <!-- Terminali Table -->
+        <div id="terminali-table" class="mt-4">  <!-- Dedicated div for the table -->
+            {% include 'notifications/terminali_table.html' %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

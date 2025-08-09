@@ -1,0 +1,15 @@
+<!-- partials/user_selection.html -->
+<div class="mb-4" id="user_selection_container">
+    <label for="user_selection_add_obrat_oddelek_group">Add users to the selected group:</label>
+    <select 
+        id="user_selection_add_obrat_oddelek_group" 
+        class="form-select js-example-basic-multiple"
+        name="users[]" 
+        multiple="multiple" 
+        x-model="groupMembers"
+    >
+        {% for user in available_users %}
+            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</option>
+        {% endfor %}
+    </select>
+</div>

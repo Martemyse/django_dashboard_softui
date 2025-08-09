@@ -1,0 +1,157 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+
+<!-- Inject the JSON data safely into JavaScript -->
+<script>
+  const loginDynamicObratiAjaxUrl = "{% url 'login_dynamic_obrati_ajax' %}";
+  const csrfToken = "{{ csrf_token }}"; // Assuming CSRF protection
+</script>
+
+{% include 'includes/navigation-fullscreen.html' %}
+
+<main class="main-content mt-0">
+  <section>
+    <div class="page-header min-vh-75">
+      <div class="container">
+        <div class="row">
+          <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+            <div class="card card-plain mt-8">
+              <div class="card-header pb-0 text-left bg-transparent">
+                <h3 class="font-weight-bolder text-info text-gradient">Prijavi se</h3>
+                <p class="mb-0">
+                  {% if msg %}
+                    <span class="text-danger">{{ msg | safe }}</span>
+                  {% else %}
+                    LTH AD uporabniško ime in vaše univerzalno geslo (enako kot prijava v vaš PC ali Infor). 
+                  {% endif %}
+                </p>
+              </div>
+              <div class="card-body">
+                <form role="form" method="post" action="{% url 'login' %}" id="loginForm">
+                  {% csrf_token %}
+                  <div class="mb-3">
+                    <!-- Checklist-style select box for 'obrat' -->
+                    <label for="obratSelect">Obrat:</label>
+                    <select id="obratSelect" class="form-select" style="width: 100%;">
+                    </select>
+                  </div>
+
+                  <!-- client IP Field (Automatically Prefilled and Disabled) -->
+                  <div class="mb-3">
+                    <label for="clientInput">IP:</label>
+                    <input type="text" id="clientInput" name="client" class="form-control" value="{{ client_ip }}" readonly>
+                  </div>
+
+                  {% for field in form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div class="mb-3">
+                      {{field}}
+                    </div>
+                  {% endfor %}
+                  <p class="">
+                    <a href="{% url 'password_reset' %}" class="text-primary">Pozabljeno geslo</a>
+                  </p>
+                  <div class="text-center">
+                    <button type="submit" class="btn bg-gradient-info w-100 mt-1 mb-0">Prijava</button>
+                    <p class="mt-4">
+                      Neuspešna prijava? 
+                      <a href="{% url 'register' %}" class="text-primary">Registracija</a>
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
+              <div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" style=""></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  $(document).ready(function () {
+      const loginDynamicObratiAjaxUrl = "{% url 'login_dynamic_obrati_ajax' %}";
+  
+      // Define the custom sort order
+      const customSortOrder = ['Ljubljana', 'Škofja Loka', 'Trata', 'Benkovac', 'Ohrid', 'Čakovec', 'LTH'];
+
+      // Trigger AJAX request on username change to load possible obrat options
+      $('#id_username').on('change', function () {
+          const username = $(this).val().toLowerCase();
+          $.ajax({
+              type: 'POST',
+              url: loginDynamicObratiAjaxUrl,
+              data: {
+                  'username': username,
+                  'csrfmiddlewaretoken': '{{ csrf_token }}'
+              },
+              headers: { 'X-Requested-With': 'XMLHttpRequest' },
+              success: function (response) {
+                  const obratSelect = $('#obratSelect');
+                  obratSelect.empty(); // Clear previous options
+
+                  if (response.options) {
+                      // Sort options according to the custom order
+                      response.options.sort(function (a, b) {
+                          return customSortOrder.indexOf(a.text) - customSortOrder.indexOf(b.text);
+                      });
+
+                      // Append sorted options to the obratSelect
+                      response.options.forEach(function (option) {
+                          obratSelect.append(new Option(option.text, option.value));
+                      });
+                  } else {
+                      obratSelect.append(new Option('-- No available options --', ''));
+                      console.error("No options received");
+                  }
+              },
+              error: function (xhr, status, error) {
+                  console.error("Error occurred: " + error);
+                  console.error(xhr.responseText);  // Log the server response for debugging
+              }
+          });
+      });
+  
+      // Submit the form and set the selected obrat after clicking the button
+      $('#loginForm').on('submit', function (e) {
+          e.preventDefault();  // Prevent default form submission
+  
+          const obratSelected = $('#obratSelect').val();
+          const csrfToken = '{{ csrf_token }}';
+  
+          // Send the selected obrat via AJAX to set it
+          $.ajax({
+              type: 'POST',
+              url: "{% url 'set_obrat_ajax' %}",
+              data: JSON.stringify({ obrat: obratSelected }),
+              contentType: 'application/json',  // Ensure JSON format
+              headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+              success: function (response) {
+                  if (response.success) {
+                      console.log("Obrat set successfully:", obratSelected);
+  
+                      // Submit the form after successful obrat setting
+                      $('#loginForm').off('submit').submit();
+                  } else {
+                      console.error("Failed to set obrat: ", response.error);
+                  }
+              },
+              error: function (xhr, status, error) {
+                  console.error("Error occurred: " + error);
+                  console.error(xhr.responseText);  // Log the server response for debugging
+              }
+          });
+      });
+  });
+</script>
+
+  
+{% include 'includes/footer-fullscreen.html' %}
+{% endblock content %}

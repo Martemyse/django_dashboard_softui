@@ -1,0 +1,101 @@
+{% extends "layouts/obvestila_base.html" %}
+
+{% block content %}
+<div class="container" x-data>
+    <h1>Obvestila - Pregled Sporočil</h1>
+
+    <!-- Inline buttons with icons and margins -->
+    <div class="d-flex mb-3" style="gap: 10px;">
+        <a href="{% url 'create_notification' %}" class="btn btn-warning">
+            <i class="fas fa-bell"></i> Ustvari Novo Obvestilo
+        </a>
+        <a href="{% url 'terminali_overview' %}" class="btn btn-info">
+            <i class="fas fa-desktop"></i> Pregled Terminalov
+        </a>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section" style="display: flex; gap: 20px; align-items: center;">
+        <!-- Key Filter -->
+        <div>
+            <label for="key-filter">Šifra sporočila:</label>
+            <input type="text" id="key-filter" name="key" 
+                   hx-get="{% url 'obvestila' %}" 
+                   hx-target="#notifications-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-include="[name='key'], [name='sender_user'], [name='receiver_user'], [name='receiver_terminal'], [name='content'], [name='hours_filter']">
+        </div>
+
+        <!-- Sender Filter -->
+        <div>
+            <label for="sender_user-filter">Pošiljatelj:</label>
+            <select id="sender_user-filter" name="sender_user" 
+                    hx-get="{% url 'obvestila' %}" 
+                    hx-target="#notifications-table"
+                    hx-trigger="change"
+                    hx-include="[name='key'], [name='sender_user'], [name='receiver_user'], [name='receiver_terminal'], [name='content'], [name='hours_filter']">
+                <option value="">Vsi</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Receiver Filter -->
+        <div>
+            <label for="receiver_user-filter">Prejemnik:</label>
+            <select id="receiver_user-filter" name="receiver_user" 
+                    hx-get="{% url 'obvestila' %}" 
+                    hx-target="#notifications-table"
+                    hx-trigger="change"
+                    hx-include="[name='key'], [name='sender_user'], [name='receiver_user'], [name='receiver_terminal'], [name='content'], [name='hours_filter']">
+                <option value="">Vsi</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Terminal Filter -->
+        <div>
+            <label for="receiver_terminal-filter">Terminal:</label>
+            <select id="receiver_terminal-filter" name="receiver_terminal" 
+                    hx-get="{% url 'obvestila' %}" 
+                    hx-target="#notifications-table"
+                    hx-trigger="change"
+                    hx-include="[name='key'], [name='sender_user'], [name='receiver_user'], [name='receiver_terminal'], [name='content'], [name='hours_filter']">
+                <option value="">Vsi</option>
+                {% for terminal in terminals %}
+                <option value="{{ terminal.id }}">{{ terminal }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Content Filter -->
+        <div>
+            <label for="content-filter">Vsebina sporočila:</label>
+            <input type="text" id="content-filter" name="content" 
+                   hx-get="{% url 'obvestila' %}" 
+                   hx-target="#notifications-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-include="[name='key'], [name='sender_user'], [name='receiver_user'], [name='receiver_terminal'], [name='content'], [name='hours_filter']">
+        </div>
+
+        <!-- Hours Filter -->
+        <div>
+            <label for="hours-filter">Poslano v zadnjih (ur):</label>
+            <input type="number" id="hours-filter" name="hours_filter" min="1" 
+                   hx-get="{% url 'obvestila' %}" 
+                   hx-target="#notifications-table"
+                   hx-trigger="change"
+                   hx-include="[name='key'], [name='sender_user'], [name='receiver_user'], [name='receiver_terminal'], [name='content'], [name='hours_filter']">
+        </div>
+    </div>
+
+    <div class="container-notifications-table" x-data>
+        <!-- Notifications Table -->
+        <div id="notifications-table" class="mt-4">  <!-- Dedicated div for the table -->
+            {% include 'notifications/notifications_table.html' %}
+        </div>
+    </div>
+    {% endblock content %}

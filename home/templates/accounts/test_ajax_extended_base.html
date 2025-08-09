@@ -1,0 +1,74 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+  {% include 'includes/navigation-fullscreen.html' %}
+
+  <main class="main-content mt-0">
+    <section>
+      <div class="page-header min-vh-75">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+              <div class="card card-plain mt-8">
+                <div class="card-header pb-0 text-left bg-transparent">
+                  <h3 class="font-weight-bolder text-info text-gradient">
+                    Test AJAX - Load User Permissions
+                  </h3>
+                  <p class="mb-0">
+                    This page tests AJAX for loading user permissions.
+                  </p>
+                </div>
+                <div class="card-body">
+                  <button id="test-ajax-btn" class="btn bg-gradient-info w-100 mt-4 mb-0">Load User Permissions</button>
+                  
+                  <!-- Container to load the permissions -->
+                  <div id="app-roles-container" class="mt-4">
+                      <!-- This will be populated with the user permissions -->
+                  </div>
+                </div>
+                <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                  <p class="mb-4 text-sm mx-auto">
+                    This is just a test page.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
+                <div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" style=""></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+{% endblock content %}
+
+{% block extrascript %}
+<script>
+    $(document).ready(function() {
+        $('#test-ajax-btn').click(function(){
+            console.log("Fixed User: dominika");  // Debugging output
+
+            $.ajax({
+                url: "{% url 'manage_permissions_ajax' %}",  // This should map to the 'manage_permissions_ajax' view
+                type: 'GET',  // Request type should be GET to load permissions
+                data: { 'user': 'dominika' },  // Send the fixed username 'dominika'
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },  // Ensure it's recognized as an AJAX request
+                success: function(data){
+                    console.log("AJAX request successful");
+                    console.log("Received data:", data);  // Log the data received from the server
+                    $('#app-roles-container').html(data);  // Update the permissions container
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX request failed: " + status + " - " + error);
+                    console.log("Response Text:", xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+{% endblock extrascript %}

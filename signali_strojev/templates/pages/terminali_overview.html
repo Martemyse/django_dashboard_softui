@@ -1,0 +1,61 @@
+{% extends "layouts/statusi_strojev_base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Pregled Terminalov</h1>
+
+    <!-- Filter Section -->
+    <div class="filter-section" style="display: flex; gap: 20px; align-items: center;">
+        <!-- Network Type Filter -->
+        <div>
+            <label for="network-type-filter">Omrežje:</label>
+            <select id="network-type-filter" name="network_type" 
+                    hx-get="{% url 'terminali_overview' %}" 
+                    hx-target="#terminali-table"
+                    hx-trigger="change"
+                    hx-include="[name='network_type'], [name='delovno_mesto'], [name='postaja'], [name='is_rom'], [name='label_rom'], [name='ip_address']">
+                <option value="">Vse</option>
+                <option value="LAN">LAN</option>
+                <option value="WIFI">WIFI</option>
+            </select>
+        </div>
+
+        <!-- Delovno Mesto Filter -->
+        <div>
+            <label for="delovno-mesto-filter">Delovno Mesto:</label>
+            <input type="text" id="delovno-mesto-filter" name="delovno_mesto" 
+                   hx-get="{% url 'terminali_overview' %}" 
+                   hx-target="#terminali-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-include="[name='network_type'], [name='delovno_mesto'], [name='postaja'], [name='is_rom'], [name='label_rom'], [name='ip_address']">
+        </div>
+
+        <!-- Postaja Filter -->
+        <div>
+            <label for="postaja-filter">Postaja:</label>
+            <input type="text" id="postaja-filter" name="postaja" 
+                   hx-get="{% url 'terminali_overview' %}" 
+                   hx-target="#terminali-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-include="[name='network_type'], [name='delovno_mesto'], [name='postaja'], [name='is_rom'], [name='label_rom'], [name='ip_address']">
+        </div>
+
+        <!-- Is ROM Filter -->
+        <div>
+            <label for="is-rom-filter">Je ROM:</label>
+            <input type="checkbox" id="is-rom-filter" name="is_rom" value="on"
+                   hx-get="{% url 'terminali_overview' %}" 
+                   hx-target="#terminali-table"
+                   hx-trigger="change"
+                   hx-include="[name='network_type'], [name='delovno_mesto'], [name='postaja'], [name='is_rom'], [name='label_rom'], [name='ip_address']"
+                   {% if request.GET.is_rom == "on" or request.GET.is_rom is None %}checked{% endif %}>
+        </div>
+        
+    </div>
+
+    <!-- Table Section -->
+    <div id="terminali-table" class="mt-4">
+        {% include 'pages/terminali_table.html' %}
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,23 @@
+<!-- partials/obrat_oddelek_groups.html -->
+<div class="mb-4" id="existing_groups_container">
+    <label for="existing_groups_add_obrat_oddelek_group">Select or add a new group:</label>
+    <div class="d-flex">
+        <select 
+            id="existing_groups_add_obrat_oddelek_group" 
+            class="form-select me-2"
+            hx-get="{% url 'manage_obrat_oddelek_groups' %}" 
+            hx-target="#user_selection_container" 
+            hx-trigger="change" 
+            name="group_id"
+        >
+            <option value="" selected disabled>Select a group</option>
+            {% for group in groups %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+            {% endfor %}
+        </select>
+        <div class="input-group">
+            <input type="text" x-model="newGroupName" class="form-control" placeholder="New group name">
+            <button id="add_group_btn_add_obrat_oddelek_group" class="btn btn-primary" @click="addObratOddelekGroup()">+</button>
+        </div>
+    </div>
+</div>

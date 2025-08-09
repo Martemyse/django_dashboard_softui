@@ -1,0 +1,196 @@
+{% load custom_filters %}
+<div class="row mt-1">
+    <div class="col-12">
+        <h4>Zadnje spremembe v akcijskih planih</h4>
+    </div>
+</div>
+<hr class="my-1"> <!-- Adds a horizontal line with some vertical spacing -->
+
+<div class="row mt-1">
+    {% for taskstep in tasksteps_modified_by_others %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <!-- Project Information -->
+                    <div>
+                        <p class="text-muted mb-1">Projekt:</p>
+                        <h5 class="font-weight-bold mb-0">{{ taskstep.stepper.project }}</h5>
+                    </div>
+
+                    <!-- Assigner Information -->
+                    <div class="text-center p-2 rounded"
+                         {% if taskstep.stepper.assigner == request.user.username %}
+                             style="background-color: #007bff; color: white;"
+                         {% else %}
+                             style="background-color: #6c757d; color: white;"
+                         {% endif %}>
+                        <p class="mb-1" style="font-size: 0.85rem;">Dodeljevalec:</p>
+                        <p class="font-weight-bold mb-0">{{ taskstep.stepper.assigner }}</p>
+                    </div>
+                </div>
+
+                <!-- Machine and Product -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Stroj:</p>
+                            <p class="mb-0">{{ taskstep.machine }}</p>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1">Izdelek:</p>
+                            <p class="mb-0">{{ taskstep.product }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Opis:</p>
+                    <p class="mb-0">{{ taskstep.description }}</p>
+                </div>
+
+                <!-- Attachments Section -->
+                {% if taskstep.attachments.all %}
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Priponke:</p>
+                    <ul class="list-unstyled">
+                        {% for attachment in taskstep.attachments.all %}
+                            {% with file_ext=attachment.file.name|file_extension %}
+                            <li>
+                                <a href="{{ attachment.file.url }}" class="attachment-link"
+                                   data-filetype="{{ file_ext }}"
+                                   data-filename="{{ attachment.file.name|basename }}">
+                                    {{ attachment.file.name|basename }}
+                                </a>
+                            </li>
+                            {% endwith %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Expiration Date -->
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Datum izteka:</p>
+                    <p class="mb-0 {% if taskstep.expiring_soon or taskstep.remaining_days == 0 and taskstep.remaining_hours == 0 %} bg-danger text-white font-weight-bold {% else %} text-muted {% endif %} p-2 rounded">
+                        {{ taskstep.exp_time|date:"D, d.m. H:i" }}
+                        ({{ taskstep.remaining_days }} dni {{ taskstep.remaining_hours }} ure)
+                    </p>
+                </div>
+
+                <!-- Actions Table -->
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Zadnji komentarji:</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless">
+                            <thead>
+                                <tr class="text-muted" style="font-size: 0.85rem;">
+                                    <th>Kommentar</th>
+                                    <th>Uporabnik</th>
+                                    <th>Čas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for action in taskstep.actions.all %}
+                                <tr>
+                                    <td style="word-wrap: break-word;">{{ action.action_name }}</td>
+                                    <td class="text-muted" style="font-size: 0.85rem;">{{ action.user }}</td>
+                                    <td class="text-muted" style="font-size: 0.85rem;">{{ action.timestamp|date:"d.m. H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">Ni komentarjev</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Comment Input -->
+                <div class="mb-3">
+                    <label for="comment_{{ taskstep.id }}" class="text-muted">Dodajte komentar:</label>
+                    <input type="text" class="form-control" id="comment_{{ taskstep.id }}" name="comment_{{ taskstep.id }}" placeholder="Dodajte komentar">
+                </div>
+
+                <!-- Status Selection -->
+                <div>
+                    <p class="text-muted mb-1">Status:</p>
+                    {% if taskstep.status|in_list:"Queued,Active,Complete" %}
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-sm btn-outline-secondary {% if taskstep.status == 'Queued' %}active{% endif %}">
+                            <input type="radio" name="status_{{ taskstep.id }}" id="queued_{{ taskstep.id }}" value="Queued" {% if taskstep.status == 'Queued' %}checked{% endif %}> V čakanju
+                        </label>
+                        <label class="btn btn-sm btn-outline-primary {% if taskstep.status == 'Active' %}active{% endif %}">
+                            <input type="radio" name="status_{{ taskstep.id }}" id="active_{{ taskstep.id }}" value="Active" {% if taskstep.status == 'Active' %}checked{% endif %}> Aktivno
+                        </label>
+                        <label class="btn btn-sm btn-outline-success {% if taskstep.status == 'Complete' %}active{% endif %}">
+                            <input type="radio" name="status_{{ taskstep.id }}" id="complete_{{ taskstep.id }}" value="Complete" {% if taskstep.status == 'Complete' %}checked{% endif %}> Končano
+                        </label>
+                    </div>
+                    {% elif taskstep.status|in_list:"Expired,ExpiredComplete" %}
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-sm btn-outline-danger {% if taskstep.status == 'Expired' %}active{% endif %}">
+                            <input type="radio" name="status_{{ taskstep.id }}" id="expired_{{ taskstep.id }}" value="Expired" {% if taskstep.status == 'Expired' %}checked{% endif %}> Preteklo
+                        </label>
+                        <label class="btn btn-sm btn-outline-warning {% if taskstep.status == 'ExpiredComplete' %}active{% endif %}">
+                            <input type="radio" name="status_{{ taskstep.id }}" id="expiredcomplete_{{ taskstep.id }}" value="ExpiredComplete" {% if taskstep.status == 'ExpiredComplete' %}checked{% endif %}> Preteklo, končano
+                        </label>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal for Image -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content bg-transparent border-0">
+        <div class="modal-body text-center p-0">
+          <img id="modalImage" src="" alt="" style="max-width:100%; max-height:80vh;">
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+      var attachmentLinks = document.querySelectorAll('.attachment-link');
+      attachmentLinks.forEach(function(link) {
+          link.addEventListener('click', function(e) {
+              e.preventDefault();
+              var fileType = link.getAttribute('data-filetype').toLowerCase();
+              var fileUrl = link.getAttribute('href');
+              var fileName = link.getAttribute('data-filename');
+  
+              if (['png', 'jpg', 'jpeg', 'gif'].includes(fileType)) {
+                  // Open image in Bootstrap modal
+                  var modalImage = document.getElementById('modalImage');
+                  modalImage.src = fileUrl;
+                  $('#imageModal').modal('show');
+              } else if (fileType === 'pdf') {
+                  // Open PDF in new tab
+                  window.open(fileUrl, '_blank');
+              } else {
+                  // For other file types, initiate download
+                  var linkElement = document.createElement('a');
+                  linkElement.href = fileUrl;
+                  linkElement.download = fileName;
+                  document.body.appendChild(linkElement);
+                  linkElement.click();
+                  document.body.removeChild(linkElement);
+              }
+          });
+      });
+  
+      // Clear the modal image source when modal is closed
+      $('#imageModal').on('hidden.bs.modal', function () {
+          $('#modalImage').attr('src', '');
+      });
+  });
+  </script>

@@ -1,0 +1,22 @@
+django
+djangorestframework
+django-ipware
+# django-xff
+gunicorn
+python-dotenv
+whitenoise
+django-admin-soft-dashboard==1.0.12
+django-htmx
+pika
+psycopg2-binary
+pytz
+python-dateutil
+pandas
+sqlalchemy
+openpyxl
+requests
+beautifulsoup4
+lxml
+
+#pywin32 #only for receiver exe
+# mysqlclient

@@ -1,0 +1,81 @@
+<!--templates/pages/konfiguracija_vgradni_deli.html -->
+{% extends "layouts/vgradni_deli_base.html" %}
+
+{% block content %}
+<div>
+    <h1>{{ safe_obrat }} - {{ safe_oddelek }} Vgradni deli Konfiguracija</h1>
+</div>
+
+<!-- AG Grid Container -->
+<div id="myGrid" style="height: 600px; width:100%;" class="ag-theme-alpine"></div>
+
+<script>
+    // Convert rowData from Python to JavaScript
+    const rowData = JSON.parse('{{ rowData|safe }}');
+
+    // Define column definitions
+    const columnDefs = [
+        { field: 'id', headerName: 'ID', editable: false, hide:true },
+        {
+            field: 'obmocje',
+            headerName: 'Obmocje',
+            editable: true,
+            cellEditor: 'agTextCellEditor' // default text editor
+        },
+        {
+            field: 'zalogovnik',
+            headerName: 'Zalogovnik',
+            editable: true,
+            cellEditor: 'agTextCellEditor'
+        },
+        { field: 'stroj', headerName: 'Stroj', editable: false },
+        { field: 'opis_stroja', headerName: 'Opis Stroja', editable: false },
+        { field: 'postaja_stroja', headerName: 'Postaja Stroja', editable: false },
+        { field: 'opis_postaje', headerName: 'Opis Postaje', editable: false },
+        { field: 'opis_delovnega_mesta', headerName: 'Opis Delovnega Mesta', editable: false },
+        { field: 'production_reported_on_postaja', headerName: 'Poročanje na postajo', editable: false },
+        { field: 'postaja_logic_used', headerName: 'Logika postaje', editable: false }
+    ];
+
+    // Grid options
+    const gridOptions = {
+        columnDefs: columnDefs,
+        rowData: rowData,
+        onCellValueChanged: onCellValueChanged
+    };
+
+    // Function to handle cell value changes
+    function onCellValueChanged(event) {
+        const data = event.data;
+        const field = event.colDef.field;
+        const value = data[field];
+        const id = data.id;
+
+        // Send AJAX request to update the database
+        fetch("{% url 'update_montaza_cell' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({id: id, field: field, value: value})
+        })
+        .then(response => response.json())
+        .then(resp => {
+            if (resp.status !== 'success') {
+                alert('Error updating value: ' + (resp.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Network error while updating value.');
+        });
+    }
+
+    // Setup the grid after the page is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const eGridDiv = document.querySelector('#myGrid');
+        new agGrid.Grid(eGridDiv, gridOptions);
+    });
+</script>
+{% endblock %}

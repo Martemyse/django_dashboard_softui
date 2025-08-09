@@ -1,0 +1,186 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+{% include 'includes/navigation-fullscreen.html' %}
+
+<script>
+  const sendNotificationUrl = "{% url 'create_notification' %}";
+</script>
+
+<main class="main-content mt-0">
+  <section>
+    <div class="page-header min-vh-75">
+      <div class="container">
+        <div class="row">
+
+          <!-- Column 1: Select Recipient (User or Terminal) -->
+          <div class="col-xl-5 col-lg-6 col-md-7 d-flex flex-column mx-auto">
+            <div class="card card-plain mt-8">
+              <div class="card-header pb-0 text-left bg-transparent">
+                <h3 class="font-weight-bolder text-info text-gradient">Prejemnik</h3>
+                <p class="mb-0">Izberite uporabnika ali terminal za prejem sporočila</p>
+              </div>
+              <div class="card-body">
+                <form id="notification-form" role="form" method="post" action="{% url 'create_notification' %}">
+                  {% csrf_token %}
+                  
+                  <!-- Recipient Type (User or Terminal) -->
+                  <div class="form-group mb-3">
+                    <label for="recipient_type">Tip prejemnika</label>
+                    <select id="recipient_type" name="recipient_type" class="form-select" required>
+                    <!-- <select id="recipient_type" name="recipient_type" class="form-select" onchange="toggleRecipientSelection()" required> -->
+                      <option value="terminal">Terminal</option>
+                      <!-- <option value="user">Uporabnik</option> -->
+                    </select>
+                  </div>
+
+                  <!-- User Selection -->
+                  <div id="user_selection" class="form-group mb-3" style="display: none;">
+                    <label for="receiver_user">Izberite uporabnika</label>
+                    <select id="receiver_user" name="receiver_user" class="form-select">
+                      {% for user in online_users %}
+                        <option value="{{ user.user.id }}">{{ user.user.username }} ({{ user.user.first_name }} {{ user.user.last_name }})</option>
+                      {% endfor %}
+                    </select>
+                    <span id="user_status_indicator"></span>
+                  </div>
+
+                  <!-- Terminal Selection -->
+                  <div id="terminal_selection" class="form-group mb-3">
+                <!-- <div id="terminal_selection" class="form-group mb-3" style="display: none;"> -->
+                  <label for="receiver_terminal_hostname">Izberite terminal</label>
+                  <select id="receiver_terminal_hostname" name="receiver_terminal_hostname" class="form-select">
+                    {% for terminal in online_terminals %}
+                      <option value="{{ terminal.terminal_hostname }}">{{ terminal.terminal_hostname }} / {{ terminal.machine }}</option>
+                    {% endfor %}
+                  </select>
+                  <span id="terminal_status_indicator"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Message Details -->
+          <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+            <div class="card card-plain mt-8">
+              <div class="card-header pb-0 text-left bg-transparent">
+                <h4 class="font-weight-bolder text-info text-gradient">Obvestilo</h4>
+                <p class="mb-0">Podrobnosti obvestila</p>
+              </div>
+              <div class="card-body">
+
+                <!-- Message Code (Šifra sporočila) -->
+                <div class="form-group mb-3">
+                  <label for="key">Šifra sporočila</label>
+                  <input type="text" id="key" name="key" class="form-control" required>
+                </div>
+
+                <!-- Notification Content -->
+                <div class="form-group mb-3">
+                  <label for="notification_content">Vsebina sporočila</label>
+                  <textarea id="notification_content" name="notification_content" class="form-control" required></textarea>
+                </div>
+
+                <!-- Checkbox for email notification -->
+                <div class="form-group mb-3">
+                  <input type="checkbox" id="notify-email" name="notify_email" value="true" checked style="accent-color: #17a2b8;">
+                  <label for="notify-email" class="form-label" style="font-size: 0.86rem;">Obvesti preko e-malia</label>
+                </div>
+
+                <!-- Checkbox for terminal notification -->
+                <div class="form-group mb-3">
+                  <input type="checkbox" id="notify-response-terminal" name="notify_response_email" value="true" checked style="accent-color: #ffc107;">
+                  <label for="notify-terminal" class="form-label" style="font-size: 0.86rem;">Avtomatsko prejmi povratni odgovor (s terminala) na e-mail</label>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                  <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Pošlji obvestilo</button>
+                </div>
+
+                <!-- Toast container -->
+                <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                  <div id="notification-toast" class="toast align-items-center text-white bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                      <div class="d-flex">
+                          <div class="toast-body">
+                              Obvestilo je bilo uspešno poslano!
+                          </div>
+                          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Zapri"></button>
+                      </div>
+                  </div>
+                </div>
+
+                <!-- Button to return to notifications overview -->
+                <div class="text-center">
+                    <a href="{% url 'obvestila' %}" class="btn btn-secondary w-100 mt-4 mb-0">Nazaj na Pregled Obvestil</a>
+                  </div>
+
+                  
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function toggleRecipientSelection() {
+    var recipientType = document.getElementById('recipient_type').value;
+    if (recipientType === 'user') {
+      document.getElementById('user_selection').style.display = 'block';
+      document.getElementById('terminal_selection').style.display = 'none';
+    } else {
+      document.getElementById('user_selection').style.display = 'none';
+      document.getElementById('terminal_selection').style.display = 'block';
+    }
+  }
+
+  // You can add JavaScript for updating status indicators for users/terminals if needed.
+</script>
+
+<script>
+document.getElementById('notification-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+      },
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          console.error('Server error:', data.error || 'Unknown error');
+          alert(`Error: ${data.error || 'An unknown error occurred'}`);
+          throw new Error(data.error || 'Unknown error');
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        const toast = new bootstrap.Toast(document.getElementById('notification-toast'));
+        toast.show();
+      } else {
+        alert('Failed to send notification.');
+      }
+    })
+    .catch(error => {
+      console.error('Request failed:', error);
+    });
+});
+
+</script>
+
+
+{% include 'includes/footer-fullscreen.html' %}
+{% endblock content %}

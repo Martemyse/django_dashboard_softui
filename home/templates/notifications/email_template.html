@@ -1,0 +1,53 @@
+<!-- templates/notifications/email_template.html -->
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .header {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .content {
+            padding: 20px;
+        }
+        .info {
+            font-size: 14px;
+            color: #777;
+        }
+        .separator {
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .link {
+            color: #0056b3;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">LTH Obvestilo (ecotech.utlth-ol.si)</div>
+
+    <div class="content">
+        <p>Pozdravljeni {{ recipient.first_name }} {{ recipient.last_name }},</p>
+        <p>Sporočilo od: <strong>{{ sender_user }}</strong></p>
+        <p>{{ notification_content }}</p>
+
+        <div class="separator"></div>
+
+        <div class="info">
+            <p>Obdelava Ljubljana<br>Vodja Oddelka: Primož Šušteršič<br>LTH Python Aplikacije</p>
+            <p>Obrat: {{ recipient.obrat_oddelek.obrat }} / Oddelek: {{ recipient.obrat_oddelek.oddelek }}</p>
+            <p>
+                <a href="http://ecotech.utlth-ol.si:8010/" class="link">Kliknite tukaj za več informacij</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

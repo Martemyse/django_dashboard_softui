@@ -1,0 +1,79 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+{% include 'includes/navigation-fullscreen.html' %}
+
+<script src="{% static 'js/common_add_group.js' %}" defer></script>
+
+<script>
+    const addGroupAjaxUrl = "{% url 'add_group_ajax' %}";
+    const manageGroupsUrl = "{% url 'manage_groups' %}";
+    const updateGroupMembersUrl = "{% url 'update_group_members' %}";
+    const users = JSON.parse('{{ users_json|escapejs }}');  // Properly pass JSON data
+</script>
+
+<main class="main-content mt-0">
+    <section>
+        <div class="page-header min-vh-75">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-7 col-md-8 d-flex flex-column mx-auto">
+                        <div class="card card-plain mt-8">
+                            <div class="card-header pb-0 text-left bg-transparent">
+                                <h3 class="font-weight-bolder text-info text-gradient">
+                                    Upravljanje Skupin
+                                </h3>
+                                <p class="mb-0">
+                                    Ustvarite novo skupino ali uredite obstoječe skupine.
+                                </p>
+                            </div>
+                            <div class="card-body">
+                                <!-- Existing Groups and Add New Group -->
+                                <div class="mb-4">
+                                    <label for="existing_groups_add_group">Izberite ali dodajte novo skupino:</label>
+                                    <div class="d-flex">
+                                        <select id="existing_groups_add_group" class="form-select me-2" onchange="loadGroupMembers()">
+                                            <option value="" selected disabled>Izberite skupino</option>
+                                            {% for group in user_groups %}
+                                                <option value="{{ group.id }}">{{ group.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="input-group">
+                                            <input type="text" id="new_group_name_add_group" class="form-control" placeholder="Ime nove skupine">
+                                            <button id="add_group_btn_add_group" class="btn btn-primary" onclick="addGroup()">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- User Selection -->
+                                <div class="mb-4">
+                                    <label for="user_selection_add_group">Dodaj uporabnike v izbrano skupino:</label>
+                                    <select id="user_selection_add_group" class="form-select js-example-basic-multiple" name="users[]" multiple="multiple">
+                                        {% for user in available_users %}
+                                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="text-center">
+                                    <button id="save_group_btn_add_group" class="btn bg-gradient-info w-100 mt-4 mb-0" onclick="saveGroup()">Shrani Spremembe</button>
+                                </div>
+                            </div>
+                            <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                                <p class="mb-4 text-sm mx-auto">
+                                    <a href="{% url 'add_user' %}" class="text-info text-gradient font-weight-bold">
+                                        Nazaj na dodajanje uporabnika
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% include 'includes/footer-fullscreen.html' %}
+{% endblock content %}

@@ -1,0 +1,23 @@
+<!-- templates/pages/statusi_skupine_strojev.html -->
+{% extends "layouts/vgradni_deli_base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4 text-primary text-center">{{ safe_obrat }} - {{ safe_oddelek }} Lean Team Pregledna Plošča</h1>
+    <div class="button-group-manufacturer">
+        {% for team_label, color in team_labels_with_colors %}
+            <div class="manufacturer-button" style="background-color: {{ color }};">
+                <a href="{% url 'team_label_view' safe_obrat safe_oddelek team_label.team_label_slug %}" class="lean-tim-button">
+                    <div class="button-header-manufacturer">
+                        <div class="button-name-manufacturer">{{ team_label.team_label }}</div>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No team labels found for this obrat and oddelek.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

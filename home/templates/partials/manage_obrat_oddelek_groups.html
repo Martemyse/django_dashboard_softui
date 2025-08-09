@@ -1,0 +1,33 @@
+<!-- partials/manage_obrat_oddelek_groups.html -->
+<div class="card-header pb-0 text-left bg-transparent">
+    <h4 class="font-weight-bolder text-info text-gradient">
+        Manage Obrat Oddelek Groups
+    </h4>
+    <p class="mb-0">
+        Create a new Obrat Oddelek Group or edit existing groups.
+    </p>
+</div>
+<div class="card-body">
+    <!-- Existing Groups and Add New Group -->
+    <div class="mb-4">
+        <label for="existing_groups_add_obrat_oddelek_group">Select or add a new group:</label>
+        <div class="d-flex">
+            <select id="existing_groups_add_obrat_oddelek_group" class="form-select me-2"
+                    hx-get="{% url 'get_obrat_oddelek_groups' %}" 
+                    hx-target="#existing_groups_add_obrat_oddelek_group"
+                    hx-trigger="change">
+                <option value="" selected disabled>Select a group</option>
+                {% for group in obrat_oddelek_groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+            <div class="input-group">
+                <input type="text" id="new_group_name_add_obrat_oddelek_group" class="form-control" placeholder="New group name">
+                <button id="add_group_btn_add_obrat_oddelek_group" class="btn btn-primary"
+                        hx-post="{% url 'add_obrat_oddelek_group_ajax' %}" 
+                        hx-include="#new_group_name_add_obrat_oddelek_group"
+                        hx-target="#existing_groups_add_obrat_oddelek_group">+</button>
+            </div>
+        </div>
+    </div>
+</div>

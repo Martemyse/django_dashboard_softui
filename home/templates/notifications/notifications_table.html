@@ -1,0 +1,119 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Šifra sporočila</th>
+            <th>Pošiljatelj</th>
+            <th>Prejemnik</th>
+            <th>Terminal</th>
+            <th>Vsebina</th>
+            <th>Poslano</th>
+            <th>Odgovor</th>
+            <th>Čas odgovora</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for notification in notifications %}
+        <tr>
+            <td>{{ notification.key }}</td>
+            <td>{{ notification.sender_user.username }}</td>
+            <td>
+                {% if notification.receiver_user %}
+                    {{ notification.receiver_user.username }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>{{ notification.receiver_terminal|default:"N/A" }}</td>
+
+            <!-- Limit the content width and use JavaScript for custom tooltip -->
+            <td class="content-cell" onmouseover="showTooltip(this)" onmouseout="hideTooltip(this)">
+                {{ notification.notification_content }}
+            </td>
+
+            <td>{{ notification.time_sent }}</td>
+            <td>{{ notification.reply_content|default:'' }}</td>
+            <td>{{ notification.time_replied|default:'' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination Controls -->
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        {% if notifications.has_previous %}
+        <li class="page-item">
+            <a class="page-link" hx-get="{% url 'obvestila' %}?page={{ notifications.previous_page_number }}" hx-target="#notifications-table">Previous</a>
+        </li>
+        {% endif %}
+
+        {% for num in notifications.paginator.page_range %}
+        {% if notifications.number == num %}
+        <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" hx-get="{% url 'obvestila' %}?page={{ num }}" hx-target="#notifications-table">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        {% if notifications.has_next %}
+        <li class="page-item">
+            <a class="page-link" hx-get="{% url 'obvestila' %}?page={{ notifications.next_page_number }}" hx-target="#notifications-table">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- JavaScript for Tooltip -->
+<script>
+    function showTooltip(element) {
+        const content = element.textContent;
+        const tooltip = document.createElement('div');
+        tooltip.className = 'custom-tooltip';
+        tooltip.textContent = content;
+        tooltip.style.position = 'absolute';
+        tooltip.style.background = '#fff';
+        tooltip.style.border = '1px solid #ddd';
+        tooltip.style.padding = '5px';
+        tooltip.style.maxWidth = '400px';
+        tooltip.style.whiteSpace = 'normal';
+        tooltip.style.zIndex = '1000';
+        tooltip.style.left = `${element.getBoundingClientRect().left}px`;
+        tooltip.style.top = `${element.getBoundingClientRect().bottom}px`;
+        document.body.appendChild(tooltip);
+        element.tooltip = tooltip;
+    }
+
+    function hideTooltip(element) {
+        if (element.tooltip) {
+            document.body.removeChild(element.tooltip);
+            element.tooltip = null;
+        }
+    }
+</script>
+
+<script>
+    function applyStyles() {
+        // Find all cells that have the class 'content-cell' and apply the necessary styles
+        const cells = document.querySelectorAll('td.content-cell');
+        cells.forEach(function(cell) {
+            cell.style.maxWidth = '150px';
+            cell.style.overflow = 'hidden';
+            cell.style.textOverflow = 'ellipsis';
+            cell.style.whiteSpace = 'nowrap';
+        });
+    }
+
+    // Reapply the styles after HTMX content is swapped
+    document.addEventListener('htmx:afterSwap', function(evt) {
+        applyStyles();  // Apply the CSS after HTMX swap
+    });
+
+    // Apply the styles when the page first loads
+    document.addEventListener('DOMContentLoaded', function() {
+        applyStyles();  // Apply the CSS initially
+    });
+</script>

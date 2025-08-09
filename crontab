@@ -1,0 +1,1 @@
+*/10 * * * * /usr/local/bin/python /app/manage.py poll_terminals >> /app/poll_terminals_logs.txt 2>&1 

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AJAX - Load User Permissions</title>
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+</head>
+<body>
+    <h1>Load User Permissions for Dominika</h1>
+    <button id="test-ajax-btn">Load User Permissionss</button>
+    
+    <!-- Container to load the permissions -->
+    <div id="app-roles-container">
+        <!-- This will be populated with the user permissions -->
+    </div>
+
+    <script>
+        $('#test-ajax-btn').click(function(){
+            console.log("Fixed User: dominika");  // Debugging output
+
+            $.ajax({
+                url: "{% url 'manage_permissions_ajax' %}",  // This should map to the 'manage_permissions_ajax' view
+                type: 'GET',  // Request type should be GET to load permissions
+                data: { 'user': 'dominika' },  // Send the fixed username 'dominika'
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },  // Ensure it's recognized as an AJAX request
+                success: function(data){
+                    console.log("AJAX request successful");
+                    console.log("Received data:", data);  // Log the data received from the server
+                    $('#app-roles-container').html(data);  // Update the permissions container
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX request failed: " + status + " - " + error);
+                    console.log("Response Text:", xhr.responseText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

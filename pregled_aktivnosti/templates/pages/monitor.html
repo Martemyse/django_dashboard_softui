@@ -1,0 +1,37 @@
+<!-- pages/vodja.html -->
+{% extends "layouts/aktivnosti_base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ obrat }} - {{ oddelek }} Monitor</h1>
+
+    <!-- Create containers where the React components will be rendered -->
+    {% for stepper in steppers %}
+    <div id="stepper-container-{{ forloop.counter }}" class="stepper-container"></div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    {% for stepper in steppers %}
+    ReactDOM.render(
+        React.createElement(StepperClick, {
+            id: '{{ stepper.id }}',
+            orientation: 'vertical',
+            steps: {{ stepper.steps|safe }},  // Assuming 'steps' is passed as JSON
+            initialCompletedSteps: {{ stepper.initialCompletedSteps|safe }},  // Assuming 'initialCompletedSteps' is passed as JSON
+            activeStep: -1,
+            assignee: '{{ stepper.assignee }}',
+            assigner: '{{ stepper.assigner }}',
+            assignee_username: '{{ stepper.assignee_username }}',
+            loggedusername: '{{ request.user.username }}',
+            hideButtons: {{ 'false' if mode == 'assigner' else 'true' }},
+            stepperWidth: {{ '400px' if mode == 'assigner' else '200px' }},
+            viewType: '{{ mode }}'
+        }),
+        document.getElementById('stepper-container-{{ forloop.counter }}')
+    );
+    {% endfor %}
+</script>
+{% endblock %}

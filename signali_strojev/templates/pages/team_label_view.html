@@ -1,0 +1,29 @@
+<!-- templates/pages/team_label_view.html -->
+{% extends "layouts/statusi_strojev_base.html" %}
+
+{% block title %}Team Label: {{ team_label }}{% endblock title %}
+{% block content %}
+<div class="container">
+    <h1 class="mb-4 text-primary text-center">{{ team_label }}</h1>
+    <div class="button-group-manufacturer">
+        {% for tim_config, color in tim_configs_with_colors %}
+            <div class="manufacturer-button" style="background-color: {{ color }};">
+                {% if tim_config.team_name_slug == 'rom' %}
+                    <a href="{% url 'terminali_overview' safe_obrat safe_oddelek team_label_slug 'rom' %}" class="lean-tim-button">
+                {% else %}
+                    <a href="{% url 'tim_detail' safe_obrat safe_oddelek team_label_slug tim_config.team_name_slug %}" class="lean-tim-button">
+                {% endif %}
+                    <div class="button-header-manufacturer">
+                        <div class="vodja-name">{{ tim_config.vodja }}</div>
+                        <div class="button-name-manufacturer">{{ tim_config.team_name }}</div>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No Tim Configurations found for this team label.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

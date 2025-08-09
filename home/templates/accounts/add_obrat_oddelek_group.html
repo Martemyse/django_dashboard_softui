@@ -1,0 +1,110 @@
+{% extends 'layouts/base-fullscreen.html' %}
+{% load i18n static admin_soft %}
+
+{% block content %}
+{% include 'includes/navigation-fullscreen.html' %}
+
+<main class="main-content mt-0" x-data="{ selectedObrat: '', newGroupName: '', groupMembers: [] }">
+    <section>
+        <div class="page-header min-vh-75">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-7 col-md-8 d-flex flex-column mx-auto">
+                        <div class="card card-plain mt-8">
+                            <div class="card-header pb-0 text-left bg-transparent">
+                                <h3 class="font-weight-bolder text-info text-gradient">
+                                    Manage Obrat Oddelek Groups
+                                </h3>
+                                <p class="mb-0">
+                                    Create a new Obrat Oddelek Group or edit existing groups.
+                                </p>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-body">
+                                    <!-- Obrat Oddelek Selection -->
+                                    <div class="mb-4">
+                                        <label for="obrat_oddelek_select">Select Obrat Oddelek:</label>
+                                        <select 
+                                            class="form-select"
+                                            id="obrat_oddelek_select" 
+                                            name="obrat_oddelek_id"
+                                            hx-get="{% url 'get_obrat_oddelek_groups' %}" 
+                                            hx-trigger="change"
+                                            hx-target="#existing_groups_container"
+                                        >
+                                            <option value="" disabled selected>Select an Obrat Oddelek</option>
+                                            {% for obrat_oddelek in available_obrat_oddelki %}
+                                                <option value="{{ obrat_oddelek.pk }}">{{ obrat_oddelek.obrat }} - {{ obrat_oddelek.oddelek }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <!-- Existing Groups and Add New Group -->
+                                <div class="mb-4" id="existing_groups_container">
+                                    <label for="existing_groups_add_obrat_oddelek_group">Select or add a new group:</label>
+                                    <div class="d-flex">
+                                        <select 
+                                            id="existing_groups_add_obrat_oddelek_group" 
+                                            class="form-select me-2"
+                                            hx-get="{% url 'manage_obrat_oddelek_groups' %}" 
+                                            hx-target="#user_selection_container" 
+                                            hx-trigger="change" 
+                                            name="group_id"
+                                        >
+                                            <option value="" selected disabled>Select a group</option>
+                                            {% for group in obrat_oddelek_groups %}
+                                                <option value="{{ group.id }}">{{ group.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="input-group">
+                                            <input type="text" x-model="newGroupName" class="form-control" placeholder="New group name">
+                                            <button id="add_group_btn_add_obrat_oddelek_group" class="btn btn-primary" @click="addObratOddelekGroup()">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!-- User Selection -->
+                                <div class="mb-4" id="user_selection_container">
+                                    <label for="user_selection_add_obrat_oddelek_group">Add users to the selected group:</label>
+                                    <select 
+                                        id="user_selection_add_obrat_oddelek_group" 
+                                        class="form-select js-example-basic-multiple"
+                                        name="users[]" 
+                                        multiple="multiple" 
+                                        x-model="groupMembers"
+                                    >
+                                        <!-- Options will be dynamically loaded -->
+                                        {% if available_users %}
+                                            {% for user in available_users %}
+                                                <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                </div>
+
+
+
+                                <div class="text-center">
+                                    <button id="save_group_btn_add_obrat_oddelek_group" class="btn bg-gradient-info w-100 mt-4 mb-0" @click="saveObratOddelekGroup()">Save Changes</button>
+                                </div>
+                            </div>
+                            <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                                <p class="mb-4 text-sm mx-auto">
+                                    <a href="{% url 'add_user' %}" class="text-info text-gradient font-weight-bold">
+                                        Back to add user
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% include 'includes/footer-fullscreen.html' %}
+{% endblock content %}

@@ -1,0 +1,104 @@
+
+<div class="row mt-1"></div>
+<h4>Obvestila s Terminalov</h4>
+<hr class="my-1"> <!-- Adds a horizontal line with some vertical spacing -->
+    {% for notification in recent_notifications %}
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="d-flex flex-column">
+                    <!-- Notification Key -->
+                    <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Šifra sporočila:</p>
+                    <h5 style="font-weight: bold; margin-bottom: 8px;">{{ notification.key }}</h5>
+
+                    <!-- Row for Recipient, Terminal Hostname, Machine, and ROM -->
+                    <div class="d-flex justify-content-between">
+                        <!-- Recipient -->
+                        <div style="flex: 1; margin-right: 10px;">
+                            <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Prejemnik:</p>
+                            <p style="margin-bottom: 8px;">
+                                {% if notification.receiver_user %}
+                                    {{ notification.receiver_user.username }}
+                                {% elif notification.receiver_terminal %}
+                                    {{ notification.receiver_terminal }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Terminal Hostname -->
+                        <div style="flex: 1; margin-right: 10px;">
+                            <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Terminal:</p>
+                            <p style="margin-bottom: 8px;">
+                                {% if notification.receiver_terminal %}
+                                    {{ notification.receiver_terminal.terminal_hostname }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Machine -->
+                        <div style="flex: 1; margin-right: 10px;">
+                            <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Stroj:</p>
+                            <p style="margin-bottom: 8px;">
+                                {% if notification.receiver_terminal %}
+                                    {{ notification.receiver_terminal.machine }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- ROM -->
+                        <div style="flex: 1;">
+                            <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">ROM:</p>
+                            <p style="margin-bottom: 8px;">
+                                {% if notification.receiver_terminal %}
+                                    {{ notification.receiver_terminal.label_rom }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Status:</p>
+                    <span style="display: inline-block; padding: 4px 8px; font-size: 0.85rem; font-weight: bold; color: white;
+                                background-color: {% if notification.status.status == 'sent' %}#ffc107{% elif notification.status.status == 'delivered' %}#dc3545{% elif notification.status.status == 'read' %}#17a2b8{% elif notification.status.status == 'replied' %}#28a745{% endif %}; 
+                                border-radius: 4px; margin-bottom: 8px;">
+                        {{ notification.status.get_status_display }}
+                    </span>
+
+                    <!-- Notification Content -->
+                    <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Vsebina sporočila:</p>
+                    <p style="margin-bottom: 8px;">{{ notification.notification_content }}</p>
+
+                    <!-- Reply Content -->
+                    <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Odgovor:</p>
+                    <p style="margin-bottom: 8px; {% if not notification.reply_content %}color: red; font-weight: bold;{% endif %}">
+                        {{ notification.reply_content|default:"Ni odgovora" }}
+                    </p>
+
+                    <!-- Time Sent -->
+                    <p style="color: #6c757d; font-size: 0.85rem; margin-bottom: 4px;">Čas pošiljanja:</p>
+                    <p style="margin-bottom: 16px;">
+                        {{ notification.time_sent|date:"D, d.m. H:i" }}
+                        <span style="color: #6c757d; font-size: 0.85rem;">
+                            ({{ notification.time_sent|timesince }} nazaj)
+                        </span>
+                    </p>
+
+                    <!-- Link to Detailed View -->
+                    <a href="{% url 'notification_detail' notification.id %}" style="color: #007bff; font-size: 0.85rem; font-weight: bold; text-decoration: none;">
+                        Prikaži več
+                        <i class="fas fa-arrow-right" style="font-size: 0.85rem; margin-left: 4px;" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
